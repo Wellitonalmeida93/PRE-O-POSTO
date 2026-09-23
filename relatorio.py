@@ -16,10 +16,10 @@ from playwright.sync_api import sync_playwright
 # ==================================================
 
 # ATENÇÃO: Coloque aqui o link da primeira aba (Visão Geral/Gráficos)
-URL_POWER_BI_1 = "https://app.powerbi.com/view?r=eyJrIjoiNWU1OTNjYzctODQ4OS00MWU1LTgwNzUtNjExODhiZDU5MjU3IiwidCI6ImY0Y2Q4NWNjLWQ1YTAtNGVmZC04NzkzLThhNzg5NDE5MGNmYSJ9&pageName=11dd9b00ac155a080748"
+URL_POWER_BI_2 = "https://app.powerbi.com/view?r=eyJrIjoiNWU1OTNjYzctODQ4OS00MWU1LTgwNzUtNjExODhiZDU5MjU3IiwidCI6ImY0Y2Q4NWNjLWQ1YTAtNGVmZC04NzkzLThhNzg5NDE5MGNmYSJ9&pageName=11dd9b00ac155a080748"
 
 # ATENÇÃO: Coloque aqui o link da segunda aba (Acordos/Tabela)
-URL_POWER_BI_2 = "https://app.powerbi.com/view?r=eyJrIjoiNWU1OTNjYzctODQ4OS00MWU1LTgwNzUtNjExODhiZDU5MjU3IiwidCI6ImY0Y2Q4NWNjLWQ1YTAtNGVmZC04NzkzLThhNzg5NDE5MGNmYSJ9&pageName=b9c5c1c000a792559110" 
+URL_POWER_BI_1 = "https://app.powerbi.com/view?r=eyJrIjoiNWU1OTNjYzctODQ4OS00MWU1LTgwNzUtNjExODhiZDU5MjU3IiwidCI6ImY0Y2Q4NWNjLWQ1YTAtNGVmZC04NzkzLThhNzg5NDE5MGNmYSJ9&pageName=b9c5c1c000a792559110" 
 
 REMETENTE_EMAIL = "welliton.almeida@pizzattolog.com.br"
 REMETENTE_SENHA = os.environ.get("SENHA_EMAIL")
