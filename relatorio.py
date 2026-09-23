@@ -135,7 +135,7 @@ def enviar_email(caminho_imagem):
                 <h2>Negociações Postos</h2>
 
                 <p>
-                    Relatório atualizado automaticamente.
+                    Segue, Análise dos preços que ficaram fora do acordo.
                 </p>
 
                 <p>
