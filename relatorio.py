@@ -124,7 +124,7 @@ def enviar_email(caminho_imagem):
 
         msg["From"] = REMETENTE_EMAIL
         msg["To"] = ", ".join(DESTINATARIOS)
-        msg["Subject"] = f"Relatório Diário de Abastecimento Salesco - {datetime.now().strftime('%d/%m/%Y')}"
+        msg["Subject"] = f"Relatório Diário de Valores Negociados - POSTOS - {(datetime.now() - timedelta(days=1)).strftime('%d/%m/%Y')}"
 
         cid_imagem = "dashboard_Salesco"
 
@@ -132,7 +132,7 @@ def enviar_email(caminho_imagem):
         <html>
             <body style="font-family: Arial">
 
-                <h2>Dashboard Salesco</h2>
+                <h2>Negociações Postos</h2>
 
                 <p>
                     Relatório atualizado automaticamente.
