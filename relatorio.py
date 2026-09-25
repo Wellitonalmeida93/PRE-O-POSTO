@@ -16,7 +16,7 @@ from playwright.sync_api import sync_playwright
 # ==================================================
 
 # Link do Power BI - Segunda Aba (Acordos/Tabela)
-URL_POWER_BI = "https://app.powerbi.com/view?r=eyJrIjoiNWU1OTNjYzctODQ4OS00MWU1LTgwNzUtNjExODhiZDU5MjU3IiwidCI6ImY0Y2Q4NWNjLWQ1YTAtNGVmZC04NzkzLThhNzg5NDE5MGNmYSJ9&pageName=11dd9b00ac155a080748" 
+URL_POWER_BI = "https://app.powerbi.com/view?r=eyJrIjoiNWU1OTNjYzctODQ4OS00MWU1LTgwNzUtNjExODhiZDU5MjU3IiwidCI6ImY0Y2Q4NWNjLWQ1YTAtNGVmZC04NzkzLThhNzg5NDE5MGNmYSJ9&pageName=11dd9b00ac155a080748"
 
 REMETENTE_EMAIL = "welliton.almeida@pizzattolog.com.br"
 REMETENTE_SENHA = os.environ.get("SENHA_EMAIL")
@@ -86,10 +86,17 @@ def capturar_print_powerbi(url, caminho_saida, nome_etapa):
         traceback.print_exc(file=sys.stdout)
         return False
 
+# ==================================================
+# ENVIO DE E-MAIL
+# ==================================================
 
-# ==================================================
-# ENVIO DE E-MAIL (LARGURA AMPLIADA)
-# ==================================================
+def anexar_imagem(msg, caminho_arquivo, cid_nome, nome_arquivo):
+    """Função auxiliar para anexar imagens ao corpo do email"""
+    with open(caminho_arquivo, "rb") as arquivo:
+        imagem = MIMEImage(arquivo.read())
+        imagem.add_header("Content-ID", f"<{cid_nome}>")
+        imagem.add_header("Content-Disposition", "inline", filename=nome_arquivo)
+        msg.attach(imagem)
 
 def enviar_email(caminho_img):
     print("=" * 60)
@@ -98,7 +105,7 @@ def enviar_email(caminho_img):
 
     try:
         if not REMETENTE_SENHA:
-            print("❌ SENHA_EMAIL não encontrada.")
+            print("❌ SENHA_EMAIL não encontrada nas variáveis de ambiente.")
             return False
 
         msg = MIMEMultipart("related")
@@ -156,6 +163,7 @@ def enviar_email(caminho_img):
 
         msg.attach(MIMEText(html, "html", "utf-8"))
 
+        # Anexa a imagem capturada
         anexar_imagem(msg, caminho_img, "img_acordos", "analise_acordos.png")
 
         print("📡 Conectando Gmail SMTP...")
@@ -177,5 +185,27 @@ def enviar_email(caminho_img):
         print("\n❌ ERRO AO ENVIAR E-MAIL")
         traceback.print_exc(file=sys.stdout)
         return False
+
+# ==================================================
+# EXECUÇÃO PRINCIPAL
+# ==================================================
+
+if __name__ == "__main__":
+    print("🚀 INICIANDO PROCESSO")
+
+    pasta_script = os.path.dirname(os.path.abspath(__file__))
+    img_acordos = os.path.join(pasta_script, "print_acordos.png")
+
+    # 1. Captura a imagem
+    sucesso_captura = capturar_print_powerbi(URL_POWER_BI, img_acordos, "ANÁLISE DE ACORDOS")
+    if not sucesso_captura:
+        print("🛑 Falha na captura do Power BI. Encerrando execução.")
+        sys.exit(1)
+
+    # 2. Envia o e-mail
+    sucesso_email = enviar_email(img_acordos)
+    if not sucesso_email:
+        print("🛑 Falha no envio do e-mail.")
+        sys.exit(1)
 
     print("🎉 PROCESSO CONCLUÍDO COM SUCESSO")
