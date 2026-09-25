@@ -22,7 +22,10 @@ REMETENTE_EMAIL = "welliton.almeida@pizzattolog.com.br"
 REMETENTE_SENHA = os.environ.get("SENHA_EMAIL")
 
 DESTINATARIOS = [
-    "welliton.almeida@pizzattolog.com.br"
+    "welliton.almeida@pizzattolog.com.br",
+    "Israel.joia@pizzattolog.com.br",
+    "daniel.sacramento@pizzattolog.com.br",
+    "magdo.ferreira@pizzattolog.com.br",
 ]
 
 SMTP_SERVIDOR = "smtp.gmail.com"
