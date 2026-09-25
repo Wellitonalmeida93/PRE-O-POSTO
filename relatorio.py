@@ -29,7 +29,7 @@ SMTP_SERVIDOR = "smtp.gmail.com"
 SMTP_PORTA = 587
 
 # ==================================================
-# CAPTURA DO POWER BI
+# CAPTURA DO POWER BI (COM ZOOM E ALTA RESOLUÇÃO)
 # ==================================================
 
 def capturar_print_powerbi(url, caminho_saida, nome_etapa):
@@ -43,7 +43,13 @@ def capturar_print_powerbi(url, caminho_saida, nome_etapa):
                 headless=True,
                 args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
             )
-            context = browser.new_context(viewport={"width": 1920, "height": 1080})
+            
+            # device_scale_factor=2 garante nitidez HD (Retina)
+            # 1366x768 força o Power BI a ampliar os elementos nativamente
+            context = browser.new_context(
+                viewport={"width": 1366, "height": 768},
+                device_scale_factor=2
+            )
             page = context.new_page()
             page.set_default_timeout(120000)
 
@@ -52,6 +58,10 @@ def capturar_print_powerbi(url, caminho_saida, nome_etapa):
 
             print("⏳ Aguardando renderização dos gráficos...")
             time.sleep(60)
+
+            # Aplica zoom de 25% na página para ampliar tabelas e textos
+            page.evaluate("document.body.style.zoom = '1.25'")
+            time.sleep(2)
 
             print("📷 Capturando screenshot...")
             page.screenshot(path=caminho_saida, full_page=True)
@@ -76,17 +86,10 @@ def capturar_print_powerbi(url, caminho_saida, nome_etapa):
         traceback.print_exc(file=sys.stdout)
         return False
 
-# ==================================================
-# ENVIO DE E-MAIL
-# ==================================================
 
-def anexar_imagem(msg, caminho_arquivo, cid_nome, nome_arquivo):
-    """Função auxiliar para anexar imagens ao corpo do email"""
-    with open(caminho_arquivo, "rb") as arquivo:
-        imagem = MIMEImage(arquivo.read())
-        imagem.add_header("Content-ID", f"<{cid_nome}>")
-        imagem.add_header("Content-Disposition", "inline", filename=nome_arquivo)
-        msg.attach(imagem)
+# ==================================================
+# ENVIO DE E-MAIL (LARGURA AMPLIADA)
+# ==================================================
 
 def enviar_email(caminho_img):
     print("=" * 60)
@@ -105,12 +108,12 @@ def enviar_email(caminho_img):
         data_ontem = (datetime.now() - timedelta(days=1)).strftime('%d/%m/%Y')
         msg["Subject"] = f"📊 Relatório Diário de Valores Negociados - POSTOS - {data_ontem}"
 
-        # HTML do E-mail
+        # HTML com container expandido (1100px) e menor padding lateral
         html = f"""
         <html>
-            <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px 0;">
+            <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 10px 0; margin: 0;">
                 
-                <div style="max-width: 900px; margin: 0 auto; background-color: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <div style="max-width: 1100px; margin: 0 auto; background-color: #ffffff; padding: 20px 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
                     
                     <!-- CABEÇALHO -->
                     <h2 style="color: #1a365d; text-align: center; border-bottom: 2px solid #1a365d; padding-bottom: 15px; margin-top: 0;">
@@ -118,15 +121,14 @@ def enviar_email(caminho_img):
                     </h2>
                     
                     <p style="text-align: center; color: #555; font-size: 14px;">
-                        Resumo atualizado referente ao dia <strong>{data_ontem}</strong>.<br>
-                        <br>
+                        Resumo atualizado referente ao dia <strong>{data_ontem}</strong>.<br><br>
                         <a href="{URL_POWER_BI}" style="display: inline-block; background-color: #0056b3; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; font-size: 13px;">
                             Acessar Dashboard Online
                         </a>
                     </p>
 
                     <!-- IMAGEM: ACORDOS -->
-                    <div style="margin-top: 40px;">
+                    <div style="margin-top: 25px;">
                         <h3 style="background-color: #fdf5f5; padding: 10px 15px; border-left: 4px solid #d9534f; color: #333; margin-bottom: 15px; font-size: 16px;">
                             ⚠️ Análise de Acordos e Divergências
                         </h3>
@@ -134,12 +136,12 @@ def enviar_email(caminho_img):
                             Atenção aos postos com status <strong>"Acima do Acordo"</strong> ou <strong>"Sem Acordo"</strong>.
                         </p>
                         <div style="text-align: center;">
-                            <img src="cid:img_acordos" style="width: 100%; max-width: 850px; border: 1px solid #ddd; border-radius: 6px;">
+                            <img src="cid:img_acordos" style="width: 100%; max-width: 1060px; height: auto; border: 1px solid #ddd; border-radius: 6px;">
                         </div>
                     </div>
 
                     <!-- RODAPÉ -->
-                    <div style="margin-top: 50px; border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #999; font-size: 12px;">
+                    <div style="margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; text-align: center; color: #999; font-size: 12px;">
                         <p>
                             Este é um relatório automático gerado pelo sistema.<br>
                             Em caso de dúvidas, consulte o painel completo no Power BI.
@@ -154,7 +156,6 @@ def enviar_email(caminho_img):
 
         msg.attach(MIMEText(html, "html", "utf-8"))
 
-        # Anexando apenas a imagem de Acordos
         anexar_imagem(msg, caminho_img, "img_acordos", "analise_acordos.png")
 
         print("📡 Conectando Gmail SMTP...")
@@ -176,29 +177,5 @@ def enviar_email(caminho_img):
         print("\n❌ ERRO AO ENVIAR E-MAIL")
         traceback.print_exc(file=sys.stdout)
         return False
-
-# ==================================================
-# EXECUÇÃO
-# ==================================================
-
-if __name__ == "__main__":
-    print("🚀 INICIANDO PROCESSO")
-
-    pasta_script = os.path.dirname(os.path.abspath(__file__))
-    
-    # Caminho do print
-    img_acordos = os.path.join(pasta_script, "print_acordos.png")
-
-    # 1. Captura apenas a tela de Acordos
-    sucesso = capturar_print_powerbi(URL_POWER_BI, img_acordos, "ANÁLISE DE ACORDOS")
-    if not sucesso:
-        print("🛑 Falha ao capturar página do dashboard.")
-        sys.exit(1)
-
-    # 2. Envia o e-mail
-    sucesso_email = enviar_email(img_acordos)
-    if not sucesso_email:
-        print("🛑 Falha ao enviar e-mail.")
-        sys.exit(1)
 
     print("🎉 PROCESSO CONCLUÍDO COM SUCESSO")
